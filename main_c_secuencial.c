@@ -6,7 +6,7 @@
     unsigned t_ini, t_fin;
     double segs;
     char nombre1[20], nombre2[20], mascara[20]; // Nombres de archivo
-    int largo1, largo2, largoM; 		// Tamaño archivos
+    int largo1, largo2, largoM; 		// Tamaï¿½o archivos
     char c1,c2,c3,aux='\00';			// Caracter color negro
     unsigned char *buffer1, *buffer2, *bufferM; // puntero a datos archivo 
     FILE *arch1, *arch2, *masc;			// puntero a archivos
@@ -20,7 +20,8 @@
     void *enmascarar_p(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
-    int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
+   // Comentado porque da errores al compilar
+   // int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     
     
 int main()
@@ -34,7 +35,7 @@ int main()
  
     enmascarar_c(buffer1,buffer2,bufferM,largo1);
     enmascarar_asm(buffer1,buffer2,bufferM,largo1);
-    enmascarar_threads(buffer1,buffer2,bufferM,largo1);
+    //enmascarar_threads(buffer1,buffer2,bufferM,largo1);
 
     escribir_y_cerrar_archivos();
    
@@ -46,22 +47,22 @@ int main()
 
 void abrir_archivos(){
 
-    arch1=fopen("b1.bmp","rb");  // apertura de archivo origen 1
+    arch1=fopen("Imagenes/b1.bmp","rb");  // apertura de archivo origen 1
     if(arch1 == NULL ) {
      printf("No fue posible abrir el archivo origen 1\n");
      exit(-1);
     } 
-    arch2=fopen("b2.bmp","rb");  // apertura de archivo origen 2
+    arch2=fopen("Imagenes/b2.bmp","rb");  // apertura de archivo origen 2
     if(arch2 == NULL ) {
      printf("No fue posible abrir el archivo origen 2\n");
      exit(-1);
     }
-    masc=fopen("bmasc.bmp","rb");  // apertura de archivo mascara
+    masc=fopen("Imagenes/bmasc.bmp","rb");  // apertura de archivo mascara
     if(masc == NULL ) {
      printf("No fue posible abrir el archivo origen masc\n");
      exit(-1);
     }
-    dest=fopen("dest.bmp","wb");  //apertura de archivo final o destino
+    dest=fopen("Imagenes/dest.bmp","wb");  //apertura de archivo final o destino
     if(dest == NULL ) {
      printf("No fue posible abrir el archivo destino\n");
      exit(-1);
@@ -71,19 +72,19 @@ void abrir_archivos(){
 void calcular_tamanio(){
 
     fseek(arch1, 0L, SEEK_END);   //me posiciono al final del archivo1
-    largo1 = ftell(arch1);        //guardo tamaño de archivo 1
+    largo1 = ftell(arch1);        //guardo tamaï¿½o de archivo 1
     fseek(arch1, 0L, SEEK_SET);   // me posiciono nuevamente al principio
     
     fseek(arch2, 0L, SEEK_END);   //me posiciono al final del archivo2
-    largo2 = ftell(arch2);        //guardo tamaño de archivo 2
+    largo2 = ftell(arch2);        //guardo tamaï¿½o de archivo 2
     fseek(arch2, 0L, SEEK_SET);   // me posiciono nuevamente al principio
    
     fseek(masc, 0L, SEEK_END);    //me posiciono al final del archivo mascara
-    largoM = ftell(masc);         //guardo tamaño de la mascara
+    largoM = ftell(masc);         //guardo tamaï¿½o de la mascara
     fseek(masc, 0L, SEEK_SET);   // me posiciono nuevamente al principio
    
-    if (largo1 != largo2 || largo1 != largoM){ //Verifico que sean del mismo tamaño
-        printf(" Archivos de distinto tamaño\n");
+    if (largo1 != largo2 || largo1 != largoM){ //Verifico que sean del mismo tamaï¿½o
+        printf(" Archivos de distinto tamaï¿½o\n");
         exit(-1);
     }
 }
@@ -131,7 +132,7 @@ int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int c
 
 }
 
-
+/* Comentado porque da errores al compilar
 int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant){
  
    pthread_t thr1;
@@ -203,3 +204,4 @@ void *enmascarar_p3(void){
 
 }
 
+*/
