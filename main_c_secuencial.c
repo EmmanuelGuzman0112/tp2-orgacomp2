@@ -20,6 +20,9 @@
     void *enmascarar_p(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
+
+    //Funcion que va a asembler
+    //extern void enmascarar_asm_externa(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
    // Comentado porque da errores al compilar
    // int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     
@@ -33,7 +36,8 @@ int main()
     calcular_tamanio();  
     guardar_en_buffer();
  
-    enmascarar_c(buffer1,buffer2,bufferM,largo1);
+    //DESCOMENTAR!
+    //enmascarar_c(buffer1,buffer2,bufferM,largo1);
     enmascarar_asm(buffer1,buffer2,bufferM,largo1);
     //enmascarar_threads(buffer1,buffer2,bufferM,largo1);
 
@@ -74,7 +78,7 @@ void calcular_tamanio(){
     fseek(arch1, 0L, SEEK_END);   //me posiciono al final del archivo1
     largo1 = ftell(arch1);        //guardo tama�o de archivo 1
     fseek(arch1, 0L, SEEK_SET);   // me posiciono nuevamente al principio
-    
+   
     fseek(arch2, 0L, SEEK_END);   //me posiciono al final del archivo2
     largo2 = ftell(arch2);        //guardo tama�o de archivo 2
     fseek(arch2, 0L, SEEK_SET);   // me posiciono nuevamente al principio
@@ -129,7 +133,19 @@ int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int can
 
 int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int cant){
     printf("Dentro de la funcion enmascarar ASM !!\n");
+    
+    t_ini = clock();
+    // for (int i=0; i<cant; i++){  //tantas iteraciones como bytes tiene el archivo
+    //    if (*(mask+i) != aux)
+    //         *(a+i) = *(b+i);
 
+    // }
+    //enmascarar_asm_externa(a,b,mask,cant);
+    t_fin = clock();
+    
+    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+    printf("Tiempo usado: %.16g milisegundos\n\n", segs * 1000.0);
+    return 0;
 }
 
 /* Comentado porque da errores al compilar
