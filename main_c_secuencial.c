@@ -1,47 +1,69 @@
 #include<stdio.h>																																																												
 #include<stdlib.h>
+#include<string.h>
 #include<time.h>
-#include<pthread.h>																																																									
+																																																									
     
     unsigned t_ini, t_fin;
+    double t_c, t_asm;				// Tiempo ejecucion C y asm
     double segs;
-    char nombre1[20], nombre2[20], mascara[20]; // Nombres de archivo
-    int largo1, largo2, largoM; 		// Tama�o archivos
+    char nombre1[10], nombre2[10], mascara[10]; // Nombres de archivo
+    int largo1, largo2, largoM; 		// Tamaño archivos
     char c1,c2,c3,aux='\00';			// Caracter color negro
     unsigned char *buffer1, *buffer2, *bufferM; // puntero a datos archivo 
     FILE *arch1, *arch2, *masc;			// puntero a archivos
-    FILE *dest;
+    FILE *dest;					// archvivo de imagen de salida
+    FILE *result;				// archivo CSV con estadisticas
 
    
     void abrir_archivos();
     void calcular_tamanio();
     void guardar_en_buffer();
     void escribir_y_cerrar_archivos();
-    void *enmascarar_p(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
+    void metricas();
     int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
+<<<<<<< HEAD
 
     //Funcion que va a asembler
     extern void enmascarar_asm_externa(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
    // Comentado porque da errores al compilar
    // int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     
+=======
+   
+>>>>>>> dcdaef2db56fc9679d1fce63304cdffeeb0d5d6f
     
-int main()
+int main(int argc, char *argv[])
 {
-
     printf("Hola empezando \n");
+
+    strcat(nombre1,argv[1]);
+    strcat(nombre2,argv[2]);
+    strcat(mascara,argv[3]);
+
+
+    printf("Nombres de archivos: \n");
+
+    printf(" %s\n", nombre1);
+    printf(" %s\n", nombre2);
+    printf(" %s\n", mascara);
 
     abrir_archivos();  
     calcular_tamanio();  
     guardar_en_buffer();
  
-    //DESCOMENTAR!
-    //enmascarar_c(buffer1,buffer2,bufferM,largo1);
+    enmascarar_c(buffer1,buffer2,bufferM,largo1);
+
+    t_ini = clock();
     enmascarar_asm(buffer1,buffer2,bufferM,largo1);
-    //enmascarar_threads(buffer1,buffer2,bufferM,largo1);
+    t_fin = clock();
+    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+    t_asm = segs,
+    printf("Tiempo usado en asm: %.16g milisegundos\n\n", segs * 1000.0);
 
     escribir_y_cerrar_archivos();
+    metricas();
    
     return 0;
 }
@@ -51,22 +73,25 @@ int main()
 
 void abrir_archivos(){
 
-    arch1=fopen("Imagenes/b1.bmp","rb");  // apertura de archivo origen 1
+
+    arch1=fopen(nombre1,"rb");  // apertura de archivo origen 1
     if(arch1 == NULL ) {
      printf("No fue posible abrir el archivo origen 1\n");
      exit(-1);
     } 
-    arch2=fopen("Imagenes/b2.bmp","rb");  // apertura de archivo origen 2
+
+    arch2=fopen(nombre2,"rb");  // apertura de archivo origen 1
     if(arch2 == NULL ) {
      printf("No fue posible abrir el archivo origen 2\n");
      exit(-1);
     }
-    masc=fopen("Imagenes/bmasc.bmp","rb");  // apertura de archivo mascara
+
+    masc=fopen(mascara,"rb");  // apertura de archivo origen 1
     if(masc == NULL ) {
      printf("No fue posible abrir el archivo origen masc\n");
      exit(-1);
     }
-    dest=fopen("Imagenes/dest.bmp","wb");  //apertura de archivo final o destino
+    dest=fopen("dest.bmp","wb");  //apertura de archivo final o destino
     if(dest == NULL ) {
      printf("No fue posible abrir el archivo destino\n");
      exit(-1);
@@ -76,19 +101,19 @@ void abrir_archivos(){
 void calcular_tamanio(){
 
     fseek(arch1, 0L, SEEK_END);   //me posiciono al final del archivo1
-    largo1 = ftell(arch1);        //guardo tama�o de archivo 1
+    largo1 = ftell(arch1);        //guardo tamaño de archivo 1
     fseek(arch1, 0L, SEEK_SET);   // me posiciono nuevamente al principio
    
     fseek(arch2, 0L, SEEK_END);   //me posiciono al final del archivo2
-    largo2 = ftell(arch2);        //guardo tama�o de archivo 2
+    largo2 = ftell(arch2);        //guardo tamaño de archivo 2
     fseek(arch2, 0L, SEEK_SET);   // me posiciono nuevamente al principio
    
     fseek(masc, 0L, SEEK_END);    //me posiciono al final del archivo mascara
-    largoM = ftell(masc);         //guardo tama�o de la mascara
+    largoM = ftell(masc);         //guardo tamaño de la mascara
     fseek(masc, 0L, SEEK_SET);   // me posiciono nuevamente al principio
    
-    if (largo1 != largo2 || largo1 != largoM){ //Verifico que sean del mismo tama�o
-        printf(" Archivos de distinto tama�o\n");
+    if (largo1 != largo2 || largo1 != largoM){ //Verifico que sean del mismo tamaño
+        printf(" Archivos de distinto tamaño\n");
         exit(-1);
     }
 }
@@ -111,6 +136,11 @@ void escribir_y_cerrar_archivos(){
     fclose(arch2);
     fclose(masc);
     fclose(dest);
+
+    free(buffer1);
+    free(buffer2);
+    free(bufferM);
+    
 }
 
 
@@ -126,7 +156,8 @@ int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int can
     t_fin = clock();
     
     segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
-    printf("Tiempo usado: %.16g milisegundos\n\n", segs * 1000.0);
+    t_c = segs,
+    printf("Tiempo usado en C: %.16g milisegundos\n\n", segs * 1000.0);
     return 0;
 }
 
@@ -147,76 +178,34 @@ int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int c
     return 0;
 }
 
-/* Comentado porque da errores al compilar
-int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant){
- 
-   pthread_t thr1;
-   pthread_t thr2;
-   pthread_t thr3;
 
-   int cant1, cant2;
-   int l3;
-   
-   cant1 = cant/3;
-   cant2= cant-(2*cant1);
-   l3= aux*2;
-   printf("Dentro de la funcion enmascarar THREADS !!\n\n");
-   printf("Total de elementos o Bytes a leer: %d \n", cant);
-   
-   printf("Hilo 1 leera %d  elementos\n", aux);
-   printf("Hilo 2 leera %d  elementos\n", aux);
-   printf("Hilo 3 leera %d  elementos\n", aux2);
+void metricas(){
+
+    char info[50], stamanio[10], stiempo_c[20], stiempo_asm[20];
+
+    result=fopen("metricas.csv","a");  //apertura de archivo de metricas
+    if(result == NULL ) {
+     printf("No fue posible abrir el archivo de metricas\n");
+     exit(-1);
+    }	
+
+    sprintf(stamanio, "%d", largo1);	//convierto a string el tamaño archivo
+    sprintf(stiempo_c, "%.16g", t_c);  //convierto a string el tiempo
+    sprintf(stiempo_asm, "%.16g", t_asm);  //convierto a string el tiempo
 
 
-   pthread_create(&thr1, NULL, enmascarar_p1, NULL);
-   pthread_create(&thr2, NULL, enmascarar_p2, NULL);
-   pthread_create(&thr3, NULL, enmascarar_p3, NULL);
-
-   pthread_join(thr1, NULL);
-   pthread_join(thr2, NULL);
-   pthread_join(thr3, NULL);
-
-   pthread_exit(NULL);
+    strcat(info,nombre1);
+    strcat(info,",");
+    strcat(info,stamanio);
+    strcat(info,",");
+    strcat(info,stiempo_c );
+    strcat(info,",");
+    strcat(info,stiempo_asm);
 
 
+    fputs(info, result);  
+    fclose(result);
+  
+    printf("Contenido archivo metricas.csv: %s \n", info);
 
 }
-
-void *enmascarar_p1(void){
-
-    printf("Dentro de la funcion enmascarar p1 !!\n");
-
-    for (int i=0; i<cant1; i++){  
-       if (*(mask+i) != aux)
-            *(a+i) = *(b+i);
-
-    }
-
-}
-
-
-void *enmascarar_p2(void){
-
-    printf("Dentro de la funcion enmascarar p2 !!\n");
-
-    for (int i=0; i<cant1; i++){  
-       if (*(mask+cant+i) != aux)
-            *(a+cant+i) = *(b+cant+i);
-
-    }
-
-}
-
-void *enmascarar_p3(void){
-
-    printf("Dentro de la funcion enmascarar p3 !!\n");
-
-    for (int i=0; i<cant2; i++){  
-       if (*(mask+l3+i) != aux)
-            *(a+l3+i) = *(b+l3+i);
-
-    }
-
-}
-
-*/
