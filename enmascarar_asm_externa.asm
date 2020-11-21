@@ -27,10 +27,10 @@ enmascarar_asm_externa:
     
     xor edx,edx  ;uso edx como acumulador para ciclar
 
-    movq mm0,qword[EBP+8+8*edx] ; bufferImgA
-    movq mm1,qword[EBP+8*edx]; bufferImgB
-    movq mm2,qword[EBP+8*edx]; bufferMasc
-    movq mm3,qword[ebp+32]; cantidad bytes de imagenes -> quizas podria ir en un registro de prop. general
+    movq mm0,qword[EBP+8+(8*edx)] ; bufferImgA
+    movq mm1,qword[EBP+16+(8*edx)]; bufferImgB
+    movq mm2,qword[EBP+24(8*edx)]; bufferMasc
+    movq mm3,qword[EBP+32]; cantidad bytes de imagenes -> quizas podria ir en un registro de prop. general
     ;pcmpeqb mm0,mm1 compara mm0 con mm1. Si son iguales deja ff sino 00. Quizas seria util para la mascara
 
     mov ebp,esp ;Reset Stack (leave)
