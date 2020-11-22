@@ -1,7 +1,8 @@
 #include<stdio.h>																																																												
 #include<stdlib.h>
 #include<time.h>
-#include<pthread.h>																																																									
+#include<pthread.h>
+#include<string.h>																																																			
     
     unsigned t_ini, t_fin;
     double segs;
@@ -10,51 +11,49 @@
     char aux='\00';			// Caracter color negro
     unsigned char *buffer1, *buffer2, *bufferM; // puntero a datos archivo 
     FILE *arch1, *arch2, *masc;			// puntero a archivos
-    FILE *dest;
+    FILE *dest;                 // archvivo de imagen de salida
+    FILE *result;				// archivo CSV con estadisticas
 
     int pixelPCadaHilo;
    
     pthread_t thr1;
     pthread_t thr2;
     pthread_t thr3;
-   
+
+    struct parametros {
+        int pixelDesde;
+        int pixelHasta;
+    };
+
     void abrir_archivos();
     void calcular_tamanio();
     void guardar_en_buffer();
     void escribir_y_cerrar_archivos();
-    void *enmascarar_p1(void *parametro);
-    void *enmascarar_p2(void *parametro);
-    void *enmascarar_p3(void *parametro);
- 
+    //void metricas();
+    //void inicializar_metricas();
+    void enmascarar_threads();
+    void *enmascarar_p(void *parametro); 
     
-int main()
+int main(int argc, char *argv[])
 {
-
     printf("Hola empezando \n");
+
+    strcat(nombre1,argv[1]);
+    strcat(nombre2,argv[2]);
+    strcat(mascara,argv[3]);
+
+    printf("Nombres de archivos: \n");
+
+    printf(" %s\n", nombre1);
+    printf(" %s\n", nombre2);
+    printf(" %s\n", mascara);
 
     abrir_archivos();  
     calcular_tamanio();  
     guardar_en_buffer();
 
-    //Calculo la division de pixeles para cada hilo
-    pixelPCadaHilo = largoImagen1/3;
+    enmascarar_threads();
 
-    printf("Total de elementos o Bytes a leer: %d \n", largoImagen1);  
-
-    t_ini = clock();
-    pthread_create(&thr1, NULL, enmascarar_p1, NULL);
-    pthread_create(&thr2, NULL, enmascarar_p2, NULL);
-    pthread_create(&thr3, NULL, enmascarar_p3, NULL);
-
-    pthread_join(thr1, NULL);
-    pthread_join(thr2, NULL);
-    pthread_join(thr3, NULL);
-
-    
-
-    t_fin = clock();    
-    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
-    printf("Tiempo usado: %.16g milisegundos\n\n", segs * 1000.0);
 
     escribir_y_cerrar_archivos();
 
@@ -68,17 +67,17 @@ int main()
 
 void abrir_archivos(){
 
-    arch1=fopen("b1.bmp","rb");  // apertura de archivo origen 1
+    arch1=fopen(nombre1,"rb");  // apertura de archivo origen 1
     if(arch1 == NULL ) {
      printf("No fue posible abrir el archivo origen 1\n");
      exit(-1);
     } 
-    arch2=fopen("b2.bmp","rb");  // apertura de archivo origen 2
+    arch2=fopen(nombre2,"rb");  // apertura de archivo origen 2
     if(arch2 == NULL ) {
      printf("No fue posible abrir el archivo origen 2\n");
      exit(-1);
     }
-    masc=fopen("bmasc.bmp","rb");  // apertura de archivo mascara
+    masc=fopen(mascara,"rb");  // apertura de archivo mascara
     if(masc == NULL ) {
      printf("No fue posible abrir el archivo origen masc\n");
      exit(-1);
@@ -129,47 +128,103 @@ void escribir_y_cerrar_archivos(){
     fclose(arch2);
     fclose(masc);
     fclose(dest);
+
+    free(buffer1);
+    free(buffer2);
+    free(bufferM);
+}
+
+void enmascarar_threads()
+{
+     //Calculo la division de pixeles para cada hilo
+    pixelPCadaHilo = largoImagen1/3;
+
+    printf("Total de elementos o Bytes a leer: %d \n", largoImagen1);
+
+    struct parametros parametroHilos;
+
+    t_ini = clock();
+
+    //Hilo 1
+    parametroHilos.pixelDesde = pixelPCadaHilo * 0;
+    parametroHilos.pixelHasta = pixelPCadaHilo * 1;
+    pthread_create(&thr1, NULL, enmascarar_p, (void *) &parametroHilos);
+    pthread_join(thr1, NULL);    
+
+    //Hilo 2
+    parametroHilos.pixelDesde = pixelPCadaHilo * 1;
+    parametroHilos.pixelHasta = pixelPCadaHilo * 2;
+    pthread_create(&thr2, NULL, enmascarar_p, (void *) &parametroHilos);
+    pthread_join(thr2, NULL);
+
+    //Hilo 3
+    parametroHilos.pixelDesde = pixelPCadaHilo * 2;
+    parametroHilos.pixelHasta = pixelPCadaHilo * 3;
+    pthread_create(&thr3, NULL, enmascarar_p, (void *) &parametroHilos);
+    pthread_join(thr3, NULL);        
+
+    t_fin = clock();    
+    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+    printf("Tiempo usado: %.16g milisegundos\n\n", segs * 1000.0);
 }
 
 
+void *enmascarar_p(void *parametro){
+    printf("Dentro de la funcion hilo !!\n");
 
-void *enmascarar_p1(void *parametro){
+    struct parametros * p = ( struct parametros *) parametro; //Le paso los parametros
+    int recorridoDesde = p -> pixelDesde;
+    int recorridoHasta = p -> pixelHasta;
 
-    printf("Dentro de la funcion enmascarar p1 !!\n");
-    printf("Voy a leer desde %d a %d pixel \n", pixelPCadaHilo * 0, pixelPCadaHilo * 1);
+    printf("Voy a leer desde %d a %d pixel \n", recorridoDesde, recorridoHasta);
 
-    for (int i= pixelPCadaHilo * 0; i< pixelPCadaHilo * 1; i++){  
+    for (int i= recorridoDesde; i< recorridoHasta; i++){  
        if( *(bufferM + i) != aux )
             *(buffer1 + i) = *(buffer2 + i);
 
     }
-        printf("Finalizo bien p1 \n");
+        printf("Finalizo bien \n");
 }
 
+/*void inicializar_metricas(){
+    result = fopen("results.csv", "w"); //abrir un archivo para escritura, se crea si no existe o se sobreescribe si existe.
+	fprintf(result, "%s %c %s %c %s %c %s %c %s", "Nombre del file", ',', "Tamaño", ',', "Tiempo en C", ',', "Tiempo en ASM", ',', "Tiempo en C Hilos");
+	fclose(result);
 
-void *enmascarar_p2(void *parametro){
+}*/
 
-    printf("Dentro de la funcion enmascarar p2 !!\n");
-    printf("Voy a leer desde %d a %d pixel \n", pixelPCadaHilo * 1, pixelPCadaHilo * 2);
+/*void metricas(){
 
-    for (int i= pixelPCadaHilo * 1; i<pixelPCadaHilo * 2; i++){  
-       if( *(bufferM + i) != aux)
-            *(buffer1 + i) = *(buffer2 +i);
+    char info[50], stamanio[10], stiempo_c[20], stiempo_asm[20];
 
-    }
-        printf("Finalizo bien p2 \n");
+    result=fopen("metricas.csv","a");  //apertura de archivo de metricas
+    if(result == NULL ) {
+     printf("No fue posible abrir el archivo de metricas\n");
+     exit(-1);
+    }	
+
+    sprintf(stamanio, "%d", largoImagen1);	//convierto a string el tamaño archivo
+    sprintf(stiempo_c, "%.16g", t_c);  //convierto a string el tiempo
+    sprintf(stiempo_asm, "%.16g", t_asm);  //convierto a string el tiempo
+
+//	out = fopen("results.csv", "a");
+//	fprintf(out, "%s %c %d %c %f %s", opcion, ',', bmpData.infoHeader.biHeight * bmpData.infoHeader.biWidth, ',', (double)(end-start)/CLOCKS_PER_SEC, "\n");
+//	fclose(out);
+
+
+    strcat(info,nombre1);
+    strcat(info,",");
+    strcat(info,stamanio);
+    strcat(info,",");
+    strcat(info,stiempo_c );
+    strcat(info,",");
+    strcat(info,stiempo_asm);
+
+
+    fputs(info, result);  
+    fclose(result);
+  
+    printf("Contenido archivo metricas.csv: %s \n", info);
+
 }
-
-void *enmascarar_p3(void *parametro){
-
-    printf("Dentro de la funcion enmascarar p3 !!\n");
-    printf("Voy a leer desde %d a %d pixel \n", pixelPCadaHilo * 2, pixelPCadaHilo * 3);
-
-    for (int i= pixelPCadaHilo * 2; i< pixelPCadaHilo * 3; i++){          
-       if( *(bufferM + i ) != aux)
-            *(buffer1 + i) = *(buffer2 + i);
-
-    }
-    printf("Finalizo bien p3 \n");
-}
-
+*/
