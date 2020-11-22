@@ -23,7 +23,12 @@
     void metricas();
     int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
     int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
-   
+
+    //Funcion que va a asembler
+    extern void enmascarar_asm_externa(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
+   // Comentado porque da errores al compilar
+   // int enmascarar_threads(unsigned char *a, unsigned char *b,unsigned char *mask, int cant);
+    
     
 int main(int argc, char *argv[])
 {
@@ -46,8 +51,9 @@ int main(int argc, char *argv[])
  
     enmascarar_c(buffer1,buffer2,bufferM,largo1);
 
-    t_ini = clock();
-    enmascarar_asm(buffer1,buffer2,bufferM,largo1);
+    t_ini = clock(); //no estoy seguro de este clock porque en la misma funcion tomo el tiempo-aunque podria
+    //llamarse la externa aca
+    //enmascarar_asm(buffer1,buffer2,bufferM,largo1);
     t_fin = clock();
     segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
     t_asm = segs,
@@ -155,14 +161,8 @@ int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int can
 
 int enmascarar_asm(unsigned char *a, unsigned char *b,unsigned char *mask, int cant){
     printf("Dentro de la funcion enmascarar ASM !!\n");
-    
     t_ini = clock();
-    // for (int i=0; i<cant; i++){  //tantas iteraciones como bytes tiene el archivo
-    //    if (*(mask+i) != aux)
-    //         *(a+i) = *(b+i);
-
-    // }
-    //enmascarar_asm_externa(a,b,mask,cant);
+    enmascarar_asm_externa(a,b,mask,cant);
     t_fin = clock();
     
     segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;

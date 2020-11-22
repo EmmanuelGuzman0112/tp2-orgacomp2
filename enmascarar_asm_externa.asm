@@ -2,7 +2,6 @@ global enmascarar_asm_externa
 
 section .data
 
-aux db '0' ;para el color blanco
 
 section .text 
  
@@ -14,25 +13,35 @@ enmascarar_asm_externa:
     ;
     ;
     ;bufferImgA=EBP+8
-    ;bufferImgB=EBP+16
-    ;bufferMasc=EBP+24
-    ;cant=EBP+32
+    ;bufferImgB=EBP+12
+    ;bufferMasc=EBP+16
+    ;cant=EBP+20
 
-    ; for (int i=0; i<cant; i++){  //tantas iteraciones como bytes tiene el archivo
-    ;    if (*(mask+i) != aux)
-    ;         *(a+i) = *(b+i);
-
-    ; }
     
-    
+    mov ebx,[EBP+20] ;cant bytes por img
     xor edx,edx  ;uso edx como acumulador para ciclar
+    
+ciclo:
 
-    movq mm0,qword[EBP+8+(8*edx)] ; bufferImgA
-    movq mm1,qword[EBP+16+(8*edx)]; bufferImgB
-    movq mm2,qword[EBP+24(8*edx)]; bufferMasc
-    movq mm3,qword[EBP+32]; cantidad bytes de imagenes -> quizas podria ir en un registro de prop. general
-    ;pcmpeqb mm0,mm1 compara mm0 con mm1. Si son iguales deja ff sino 00. Quizas seria util para la mascara
+    MOVQ mm0,[(ebp+8)+edx] ;imagen a
+   
+    MOVQ mm1,[(ebp+12)+edx];imagen b
+    
+    MOVQ mm2,[(ebp+16)+edx];mascara
+    
+    
+    PAND mm1, mm2 ;mantiene la imagen b cuando el pixel es negro 
+    PANDN mm2, mm0 ;mantiene la imagen a cuando el pixel es distinto de FFFFFF
+    POR mm1, mm2
+    
+    add edx,8
 
+    cmp ebx,edx
+    JNE ciclo
+     
+    
+fin:
+    
     mov ebp,esp ;Reset Stack (leave)
     pop ebp ;Restore (leave)
     
