@@ -5,6 +5,7 @@
 #include<string.h>																																																			
     
     unsigned t_ini, t_fin;
+    double t_c = 0, t_asm = 0, t_hilos = 0;				// Tiempo ejecucion C y asm
     double segs;
     char nombre1[20], nombre2[20], mascara[20]; // Nombres de archivo
     int largoImagen1, largoImagen2, largoMask; 		// Tama�o archivos
@@ -25,14 +26,14 @@
         int pixelHasta;
     };
 
+    void inicializar_metricas();
     void abrir_archivos();
     void calcular_tamanio();
     void guardar_en_buffer();
     void escribir_y_cerrar_archivos();
-    //void metricas();
-    //void inicializar_metricas();
     void enmascarar_threads();
     void *enmascarar_p(void *parametro); 
+    void metricas();
     
 int main(int argc, char *argv[])
 {
@@ -48,16 +49,15 @@ int main(int argc, char *argv[])
     printf(" %s\n", nombre2);
     printf(" %s\n", mascara);
 
+    inicializar_metricas();
     abrir_archivos();  
     calcular_tamanio();  
     guardar_en_buffer();
-
     enmascarar_threads();
-
-
     escribir_y_cerrar_archivos();
-
+    metricas();
     pthread_exit(NULL);
+    
    
     return 0;
 }
@@ -163,8 +163,9 @@ void enmascarar_threads()
     pthread_create(&thr3, NULL, enmascarar_p, (void *) &parametroHilos);
     pthread_join(thr3, NULL);        
 
-    t_fin = clock();    
+    t_fin = clock();
     segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+    t_hilos = segs;
     printf("Tiempo usado: %.16g milisegundos\n\n", segs * 1000.0);
 }
 
@@ -186,30 +187,31 @@ void *enmascarar_p(void *parametro){
         printf("Finalizo bien \n");
 }
 
-/*void inicializar_metricas(){
-    result = fopen("results.csv", "w"); //abrir un archivo para escritura, se crea si no existe o se sobreescribe si existe.
-	fprintf(result, "%s %c %s %c %s %c %s %c %s", "Nombre del file", ',', "Tamaño", ',', "Tiempo en C", ',', "Tiempo en ASM", ',', "Tiempo en C Hilos");
+void inicializar_metricas(){
+    result = fopen("metricas.csv", "w+"); //abrir un archivo para escritura, se crea si no existe o se sobreescribe si existe.
+    if(result == NULL ) {
+        printf("No fue posible crear el archivo de metricas\n");
+        exit(-1);
+    }	
+
+	fprintf(result, "%s %c %s %c %s %c %s %c %s", "Nombre", ',', "Tamaño", ',', "Tiempo en C", ',', "Tiempo en ASM", ',', "Tiempo en C Hilos\n");
 	fclose(result);
 
-}*/
+}
 
-/*void metricas(){
+void metricas(){
 
     char info[50], stamanio[10], stiempo_c[20], stiempo_asm[20];
 
-    result=fopen("metricas.csv","a");  //apertura de archivo de metricas
+    result=fopen("metricas.csv","a");  //abrir un archivo para lectura y escritura, el fichero debe existir.
     if(result == NULL ) {
-     printf("No fue posible abrir el archivo de metricas\n");
-     exit(-1);
+        printf("No fue posible abrir el archivo de metricas\n");
+        exit(-1);
     }	
 
     sprintf(stamanio, "%d", largoImagen1);	//convierto a string el tamaño archivo
     sprintf(stiempo_c, "%.16g", t_c);  //convierto a string el tiempo
     sprintf(stiempo_asm, "%.16g", t_asm);  //convierto a string el tiempo
-
-//	out = fopen("results.csv", "a");
-//	fprintf(out, "%s %c %d %c %f %s", opcion, ',', bmpData.infoHeader.biHeight * bmpData.infoHeader.biWidth, ',', (double)(end-start)/CLOCKS_PER_SEC, "\n");
-//	fclose(out);
 
 
     strcat(info,nombre1);
@@ -220,11 +222,11 @@ void *enmascarar_p(void *parametro){
     strcat(info,",");
     strcat(info,stiempo_asm);
 
-
-    fputs(info, result);  
+    //fputs(info, result);
+    //fprintf(result, "%s", "\n");
+    fprintf(result, "%s %c %d %c %Lf %c %Lf %c %Lf %s", nombre1, ',', largoImagen1, ',', (long double)t_c, ',', (long double)t_asm, ',', (long double)t_hilos, "\n");
     fclose(result);
   
     printf("Contenido archivo metricas.csv: %s \n", info);
 
 }
-*/
