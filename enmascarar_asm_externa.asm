@@ -34,6 +34,9 @@ ciclo:
     PANDN mm2, mm0 ;mantiene la imagen a cuando el pixel es distinto de FFFFFF
     POR mm1, mm2
     
+    mov eax,[ebp+8]
+    MOVQ [eax+ecx], mm1
+    
     add edx,8
 
     cmp ebx,edx
