@@ -38,7 +38,7 @@ Máscara:
 
 Finalmente el resultado es:
 
-![result](https://drive.google.com/uc?export=view&id=1ULZQj8d44otfczlJZiQ3H-LGOaPZ5KkY)
+![result](Resultados/_salida_asm.bmp)
 
 ## Ejecución
 * Para lograr lo anterior, ejecutar el script pasando las imagenes y la máscara:
@@ -46,16 +46,35 @@ Finalmente el resultado es:
 ```
 sudo sh script.sh
 ```
-Esto ejecutará un script que aplica la máscara a todas las imágenes.
+Esto ejecutará un script que aplica la máscara a todas las imágenes:
+
+![ejecucion](Resultados/Screen_ejecucion.jpg)
 
 ## Metricas Obtenidas
 
-INSERTAR TABLAS Y GRAFICOS
+Para las pruebas se ejecutaron tres corridas/ejecuciones del script anterior,obteniendo los siguientes resultados en el archivo .csv:
+
+![result](Resultados/Tabla.jpg)
+
+Con imagenes más livianas:
+
+![result](/Resultados/Grafico_serie_A.jpg)
+
+
+Con imagenes de tamaño medio
+
+![result](Resultados/Grafico_serie_E.jpg)
+
+Con imagenes más pesadas:
+
+![result](Resultados/Grafico_serie_D.jpg)
 
 ## Conclusión
 
 Concluimos que gracias a los registros MMX, podemos reducir bastante el tiempo de ejecución con respecto a ejecutarlo de forma secuencial e incluso con respecto a la ejecución en hilos. Al utilizar los registros implementados en MMX, estamos avanzando cada 8 bytes la imagen para su análisis. Esta es la explicación a los tiempos con respecto al secuencial, en el cual, como su nombre lo indica: recorremos byte por byte cada uno de ellos en la imagen. 
+
 Un comentario y no menor, los últimos bytes en la versión de assembler los recorremos con registros de propósito general. Esto sería de “forma secuencial” pero como comentamos arriba, solo son para los últimos 8 bytes. 
+
 Por otro lado, en la versión de hilos, implementamos 3 hilos , en los cada cual recorre solo su porción de imagen, es decir, partimos en 3 la cantidad bytes de la imagen y lanzamos los tres hilos en paralelo. En este caso no notamos mucha mejoría con respecto al secuencial ya que consideramos el tiempo de creación de hilo y su lanzamiento para cada uno, si bien se reducen los tiempos no es tan optimo como MMX, ya que estamos usando solo 3 hilos.
 
 ## Integrantes del Equipo
