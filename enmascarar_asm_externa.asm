@@ -70,11 +70,14 @@ menorA8:
     mov dword[acumulador],edx
     ;guardo el desplazamiento | notar que viene del lugar donde quedo en el ciclo anterior
     mov dword[desplazamiento],ebx
-    ;guardo para aplicar ese color en mascara
-    mov edx, [colorBlanco]
+    
 
  
 menorA8Ciclo:
+
+;guardo para aplicar ese color en mascara
+    mov edx, [colorBlanco]
+
     ;las operaciones se ejecutaran de forma tal que se puedan usar todos los registros sin que se pisen entre sí
 
     mov eax, [desplazamiento] ;guardo en eax el desplazamiento de cada img
