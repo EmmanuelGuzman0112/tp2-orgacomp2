@@ -230,7 +230,8 @@ void enmascarar_threads()
 
     //Hilo 3
     parametroHilos.pixelDesde = pixelPCadaHilo * 2;
-    parametroHilos.pixelHasta = pixelPCadaHilo * 3;
+    //parametroHilos.pixelHasta = pixelPCadaHilo * 3;
+	parametroHilos.pixelHasta = largoImagen1;
     pthread_create(&thr3, NULL, enmascarar_p, (void *) &parametroHilos);
         
 
