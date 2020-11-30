@@ -269,7 +269,7 @@ void inicializar_metricas(){
             exit(-1);
         }	
 
-        fprintf(result, "%s %c %s %c %s %c %s %c %s %c %s", "Nombre", ',', "Tamaño", ',', "Bytes" , ',', "Tiempo en C", ',', "Tiempo en ASM", ',', "Tiempo en C Hilos\n");
+        fprintf(result, "%s %c %s %c %s %c %s %c %s %c %s", "Nombre", ',', "Tamaño", ',', "Bytes" , ',', "Tiempo en C (en seg)", ',', "Tiempo en ASM  (en seg)", ',', "Tiempo en C Hilos  (en seg) \n");
         fclose(result);
     }
     else
