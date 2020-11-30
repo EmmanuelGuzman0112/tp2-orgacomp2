@@ -5,9 +5,13 @@
 #include<pthread.h>
 #include<unistd.h>																																																								
     
-    unsigned t_ini, t_fin;			// Capturan el tiempo
+    unsigned t_ini_c, t_fin_c;			// Capturan clocks en C
+    unsigned t_ini, t_fin;			// Capturan clocks en threads
+    unsigned t_ini_asm, t_fin_asm;		// Capturan clocks en ASM
+
     double t_c = 0, t_asm = 0, t_hilos = 0;				// Tiempo ejecucion C y asm
     double segs;
+    double clocks_x_sec;
     char nombre1[10], nombre2[10], mascara[10]; // Nombres de archivo
     char ancho_alto[15]; 			// Nombres de archivo
     int largoImagen1, largoImagen2, largoM; 		// Tamaño archivos en n° de bytes
@@ -40,28 +44,29 @@
     
 int main(int argc, char *argv[])
 {
-    printf("Hola empezando \n");
 
+    clocks_x_sec = CLOCKS_PER_SEC;
     strcat(nombre1,argv[1]);		// guardo primer argumento (archivo 1)
     strcat(nombre2,argv[2]);
     strcat(mascara,argv[3]);
     strcat(ancho_alto,argv[4]);        // guardo ultimo argumento (largo ancho)	
 
-    printf("Nombres de archivos: \n");
-    printf(" %s\n", nombre1);
-    printf(" %s\n", nombre2);
-    printf(" %s\n", mascara);
-    printf(" Ancho y alto: %s\n", ancho_alto);
+    printf("Nombres de archivos:  \n");
+    printf(" %s, ", nombre1);
+    printf(" %s, ", nombre2);
+    printf(" %s,", mascara);
+    printf("    Ancho y alto: %s\n", ancho_alto);
 
 
     inicializar_metricas();
     abrir_archivos();  
     calcular_tamanio();  
     guardar_en_buffer();
- 
+
+
+    enmascarar_asm();
     enmascarar_c(bufferC,buffer2,bufferM,largoImagen1);
     enmascarar_threads();
-    //enmascarar_asm(); COMENTO PORQUE FALLA
 
     escribir_y_cerrar_archivos();
     metricas();
@@ -92,19 +97,19 @@ void abrir_archivos(){
      exit(-1);
     }
 
-    dest_c=fopen("_salida_c.rgb" ,"wb");  //apertura de archivo final o destino C
+    dest_c=fopen("_salida_c.bmp" ,"wb");  //apertura de archivo final o destino C
     if(dest_c == NULL ) {
      printf("No fue posible abrir el archivo destino C\n");
      exit(-1);
     }
 
-    dest_asm=fopen("_salida_asm.rgb" ,"wb");  //apertura de archivo final o destino ASM
+    dest_asm=fopen("_salida_asm.bmp" ,"wb");  //apertura de archivo final o destino ASM
     if(dest_asm == NULL ) {
      printf("No fue posible abrir el archivo destino ASM\n");
      exit(-1);
     }
 
-    dest_c_hilos=fopen("_salida_c_hilos.rgb" ,"wb");  //apertura de archivo final o destino C_HILOS
+    dest_c_hilos=fopen("_salida_c_hilos.bmp" ,"wb");  //apertura de archivo final o destino C_HILOS
     if(dest_asm == NULL ) {
      printf("No fue posible abrir el archivo destino C hilos\n");
      exit(-1);
@@ -129,6 +134,8 @@ void calcular_tamanio(){
         printf(" Archivos de distinto tamaño\n");
         exit(-1);
     }
+
+    printf("Cantidad de Bytes de cada archivo: %d \n", largoImagen1);
 }
 
 void guardar_en_buffer(){
@@ -172,18 +179,15 @@ void escribir_y_cerrar_archivos(){
 
 int enmascarar_c(unsigned char *a, unsigned char *b,unsigned char *mask, int cant){
 
-    printf("Ejecutando la funcion enmascarar C \n");
-    t_ini = clock();
+    printf("Ejecutando la funcion enmascarar C \n"); 
+    t_ini_c = clock();
     for (int i=0; i<cant; i++){  //tantas iteraciones como bytes tiene el archivo
        if (*(mask+i) != aux)
             *(a+i) = *(b+i);
 
     }
-    t_fin = clock();
+    t_fin_c = clock();
     
-    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
-    t_c = segs,
-    printf("  Tiempo usado en C: %.16g milisegundos\n\n", segs * 1000.0);
     return 0;
 }
 
@@ -191,12 +195,10 @@ void enmascarar_asm()
 {
     printf("Ejecutando la funcion enmascarar ASM \n");
 
-    t_ini = clock(); 
-    //enmascarar_asm_externa(bufferASM,buffer2,bufferM,largoImagen1); COMENTO PORQUE FALLA
-    t_fin = clock();
-    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
-    t_asm = segs,
-    printf("  Tiempo usado en asm: %.16g milisegundos\n\n", segs * 1000.0);
+    t_ini_asm = clock(); 
+    enmascarar_asm_externa(bufferASM,buffer2,bufferM,largoImagen1);
+    t_fin_asm = clock();
+
 }
 
 /*HILOS */
@@ -208,52 +210,51 @@ void enmascarar_threads()
     pthread_t thr2;
     pthread_t thr3;
 
-    printf("Total de elementos o Bytes a leer: %d \n", largoImagen1);
+    printf("Ejecutando la funcion Hilos \n"																																																																																																																																																																																																																																													);
 
     struct parametros parametroHilos;
 
-    t_ini = clock();
+
 
     //Hilo 1
     parametroHilos.pixelDesde = pixelPCadaHilo * 0;
     parametroHilos.pixelHasta = pixelPCadaHilo * 1;
     pthread_create(&thr1, NULL, enmascarar_p, (void *) &parametroHilos);
-    pthread_join(thr1, NULL);    
+  
 
     //Hilo 2
     parametroHilos.pixelDesde = pixelPCadaHilo * 1;
     parametroHilos.pixelHasta = pixelPCadaHilo * 2;
     pthread_create(&thr2, NULL, enmascarar_p, (void *) &parametroHilos);
-    pthread_join(thr2, NULL);
+
 
     //Hilo 3
     parametroHilos.pixelDesde = pixelPCadaHilo * 2;
     parametroHilos.pixelHasta = pixelPCadaHilo * 3;
     pthread_create(&thr3, NULL, enmascarar_p, (void *) &parametroHilos);
-    pthread_join(thr3, NULL);        
+        
 
+    t_ini = clock();
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    pthread_join(thr3, NULL);  
     t_fin = clock();
-    segs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
-    t_hilos = segs;
-    printf("Tiempo usado: %.16g milisegundos\n\n", segs * 1000.0);
+
 }
 
 
 void *enmascarar_p(void *parametro){
-    printf("Dentro de la funcion hilo !!\n");
 
     struct parametros * p = ( struct parametros *) parametro; //Le paso los parametros
     int recorridoDesde = p -> pixelDesde;
     int recorridoHasta = p -> pixelHasta;
-
-    printf("Voy a leer desde %d a %d pixel \n", recorridoDesde, recorridoHasta);
 
     for (int i= recorridoDesde; i< recorridoHasta; i++){  
        if( *(bufferM + i) != aux )
             *(bufferC_hilos + i) = *(buffer2 + i);
 
     }
-        printf("Finalizo bien \n");
+
 }
 /*Fin Hilos */
 
@@ -286,17 +287,39 @@ void metricas(){
 
     char info[50], stamanio[10], stiempo_c[20], stiempo_asm[20];
 
+
+
     result=fopen("metricas.csv","a");  //abrir un archivo para lectura y escritura, el fichero debe existir.
     if(result == NULL ) {
         printf("No fue posible abrir el archivo de metricas\n");
         exit(-1);
     }	
 
+    segs = (double)(t_fin_asm - t_ini_asm) / clocks_x_sec;
+    segs = (double)(t_fin - t_ini) / clocks_x_sec;
+    segs = (double)(t_fin_c - t_ini_c) / clocks_x_sec;
+
+
+    segs = (double)(t_fin_asm - t_ini_asm) / clocks_x_sec;
+    t_asm = segs,
+    printf("  Tiempo usado en ASM: %.16g milisegundos\n", segs * 1000.0);
+
+    segs = (double)(t_fin - t_ini) / clocks_x_sec;
+    t_hilos = segs;
+    printf("  Tiempo usado en Threads: %.16g milisegundos\n", t_hilos * 1000.0);
+
+    segs = (double)(t_fin_c - t_ini_c) / clocks_x_sec;
+    t_c = segs,
+    printf("  Tiempo usado en C: %.16g milisegundos\n", segs * 1000.0);
+
+
+
     sprintf(stamanio, "%d", largoImagen1);	//convierto a string el tamaño archivo
     sprintf(stiempo_c, "%.16g", t_c);  //convierto a string el tiempo
     sprintf(stiempo_asm, "%.16g", t_asm);  //convierto a string el tiempo
 
-    fprintf(result, "%s %c %s %c %d %c %Lf %c %Lf %c %Lf %s", nombre1, ',', ancho_alto, ',', largoImagen1, ',', (long double)t_c, ',', (long double)t_asm, ',', (long double)t_hilos, "\n");
+    fprintf(result, "%s %c %s %c %d %c %s %c %Lf %c %Lf %s", nombre1, ',', ancho_alto, ',', largoImagen1, ',', stiempo_c, ',', (long double)t_asm, ',', (long double)t_hilos, "\n");
     fclose(result);
 
 }
+
