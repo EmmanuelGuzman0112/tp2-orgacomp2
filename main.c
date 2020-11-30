@@ -212,30 +212,34 @@ void enmascarar_threads()
 
     printf("Ejecutando la funcion Hilos \n"																																																																																																																																																																																																																																													);
 
-    struct parametros parametroHilos;
-
-    t_ini = clock();
+    struct parametros parametroHilos_1;
+    struct parametros parametroHilos_2;
+    struct parametros parametroHilos_3;
 
 
     //Hilo 1
-    parametroHilos.pixelDesde = pixelPCadaHilo * 0;
-    parametroHilos.pixelHasta = pixelPCadaHilo * 1;
-    pthread_create(&thr1, NULL, enmascarar_p, (void *) &parametroHilos);
-    pthread_join(thr1, NULL);  
+    parametroHilos_1.pixelDesde = pixelPCadaHilo * 0;
+    parametroHilos_1.pixelHasta = pixelPCadaHilo * 1;
+    pthread_create(&thr1, NULL, enmascarar_p, (void *) &parametroHilos_1);
 
     //Hilo 2
-    parametroHilos.pixelDesde = pixelPCadaHilo * 1;
-    parametroHilos.pixelHasta = pixelPCadaHilo * 2;
-    pthread_create(&thr2, NULL, enmascarar_p, (void *) &parametroHilos);
-    pthread_join(thr2, NULL);
+    parametroHilos_2.pixelDesde = pixelPCadaHilo * 1;
+    parametroHilos_2.pixelHasta = pixelPCadaHilo * 2;
+    pthread_create(&thr2, NULL, enmascarar_p, (void *) &parametroHilos_2);
 
     //Hilo 3
-    parametroHilos.pixelDesde = pixelPCadaHilo * 2;
-    parametroHilos.pixelHasta = pixelPCadaHilo * 3;
-	//parametroHilos.pixelHasta = largoImagen1;
-    pthread_create(&thr3, NULL, enmascarar_p, (void *) &parametroHilos);
-    pthread_join(thr3, NULL);          
+    parametroHilos_3.pixelDesde = pixelPCadaHilo * 2;
+    //parametroHilos_3.pixelHasta = pixelPCadaHilo * 3;
+	parametroHilos.pixelHasta = largoImagen1;
+    pthread_create(&thr3, NULL, enmascarar_p, (void *) &parametroHilos_3);
 
+
+
+    t_ini = clock();
+
+    pthread_join(thr1, NULL);  
+    pthread_join(thr2, NULL);
+    pthread_join(thr3, NULL);          
 
     t_fin = clock();
 
