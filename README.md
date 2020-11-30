@@ -38,7 +38,7 @@ Máscara:
 
 Finalmente el resultado es:
 
-INSERTAR IMAGEN COMBINADA
+![result](https://drive.google.com/uc?export=view&id=1ULZQj8d44otfczlJZiQ3H-LGOaPZ5KkY)
 
 ## Ejecución
 * Para lograr lo anterior, ejecutar el script pasando las imagenes y la máscara:
