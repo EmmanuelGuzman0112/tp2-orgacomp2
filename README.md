@@ -21,7 +21,20 @@ git clone https://github.com/EmmanuelGuzman0112/tp2-orgacomp2/
 
 Pasamos las siguientes dos imagenes y la mascara:
 
-INSERTAR IMAGENES Y MASCARA
+Imagen 1:
+
+![img1](e1.bmp)
+
+
+Imagen 2:
+
+![img1](e2.bmp)
+
+
+Máscara:
+
+![masc](emasc.bmp)
+
 
 Finalmente el resultado es:
 
@@ -31,8 +44,9 @@ INSERTAR IMAGEN COMBINADA
 * Para lograr lo anterior, ejecutar el script pasando las imagenes y la máscara:
  
 ```
-sudo sh .... 
+sudo sh script.sh
 ```
+Esto ejecutará un script que aplica la máscara a todas las imágenes.
 
 ## Metricas Obtenidas
 
