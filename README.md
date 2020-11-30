@@ -54,7 +54,10 @@ INSERTAR TABLAS Y GRAFICOS
 
 ## Conclusión
 
-HABLAR DE CUAL ES MAS RAPIDO/MEJORES RESULTADOS,ETC
+Concluimos que gracias a los registros MXX, podemos reducir bastante el tiempo de ejecución con respecto a ejecutarlo de forma secuencial e incluso con respecto a la ejecución en hilos.
+Al utilizar los registros implementados en MXX, estamos avanzando cada 8 bytes la imagen para su análisis, esta es la explicación a los tiempos con respecto al secuencial, por ejemplo, el cual, como su nombre lo dice: recorremos byte por byte cada uno de ellos en la imagen. Un comentario y no menor, los últimos bytes en la versión assembler los recorremos con registros de propósito general, esto seria de “forma secuencial” pero como comentarios arriba, solo son para los últimos 8 bytes.
+Luego, en la versión de hilos, implementamos 3 hilos, que cada hilo recorre solo su porción de imagen, es decir, partimos en 3 la cantidad bytes de la imagen y lanzamos los tres hilos en paralelo, en este caso no notamos mucha mejoría con respecto al secuencial ya que consideramos el tiempo de creación de hilo y su lanzamiento para cada uno.
+
 
 ## Integrantes del Equipo
 
